@@ -24,7 +24,7 @@ entity GraphiteServer extends ip::services::Server:
     bool webfrontend = true
 end
 
-implementation carbonServer:
+implementation carbonServer for GraphiteServer:
     pkg_2 = std::Package(host = host, name = "python-carbon", state = "installed")
     svc = std::Service(host = host, name = "carbon-cache", state = "running", onboot = true)
     
@@ -36,7 +36,7 @@ implementation carbonServer:
     svc.requires = [config, schema_config, pkg_2]
 end
 
-implementation graphiteWeb:
+implementation graphiteWeb for GraphiteServer:
     pkg_1 = std::Package(host = host, name = "graphite-web", state = "installed")
     web_py = std::ConfigFile(host = host, path = "/etc/graphite-web/local_settings.py",
         content = template("graphite/graphite-web.tmpl"))
