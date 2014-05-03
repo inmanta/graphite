@@ -41,9 +41,9 @@ implementation graphiteWeb for GraphiteServer:
     web_py = std::ConfigFile(host = host, path = "/etc/graphite-web/local_settings.py",
         content = template("graphite/graphite-web.tmpl"))
 
-    systemd_file = std::ConfigFile(host = host, path = "/etc/systemd/system/graphite-web.service", 
-        content = template("graphite/graphite-web.service.tmpl"), requires = pkg_1)
-    std::Service(host = host, name = "graphite-web", onboot = true, state = "running", requires = systemd_file)
+#    systemd_file = std::ConfigFile(host = host, path = "/etc/systemd/system/graphite-web.service", 
+#        content = template("graphite/graphite-web.service.tmpl"), requires = pkg_1)
+#    std::Service(host = host, name = "graphite-web", onboot = true, state = "running", requires = systemd_file)
 end
 
 implement GraphiteServer using graphiteWeb when webfrontend == true
