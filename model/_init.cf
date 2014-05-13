@@ -24,7 +24,7 @@ entity GraphiteServer extends ip::services::Server:
     bool webfrontend = true
 end
 
-implementation carbonServer:
+implementation carbonServerRedhat:
     pkg_2 = std::Package(host = host, name = "python-carbon", state = "installed")
     svc = std::Service(host = host, name = "carbon-cache", state = "running", onboot = true)
     
@@ -36,6 +36,10 @@ implementation carbonServer:
     svc.requires = [config, schema_config, pkg_2]
 end
 
+implementation carbonServerUbuntu:
+    pkg = std::Package(host = host, name = "python-whisper", state = "installed")
+end
+
 implementation graphiteWeb:
     pkg_1 = std::Package(host = host, name = "graphite-web", state = "installed")
     web_py = std::ConfigFile(host = host, path = "/etc/graphite-web/local_settings.py",
@@ -44,7 +48,8 @@ implementation graphiteWeb:
 end
 
 implement GraphiteServer using graphiteWeb when webfrontend == true
-implement GraphiteServer using  carbonServer
+implement GraphiteServer using carbonServerRedhat when host.os is "redhat"
+implement GraphiteServer using carbonServerUbuntu when host.os is "ubuntu"
 
 port_range = ip::Port(low = 2003)
 s_server = ip::DstService(proto = "tcp", dst_range = port_range)
