@@ -29,9 +29,9 @@ implementation carbonServer for GraphiteServer:
     svc = std::Service(host = host, name = "carbon-cache", state = "running", onboot = true)
     
     config = std::ConfigFile(host = host, path = "/etc/carbon/carbon.conf", 
-        content = template("graphite/carbon.tmpl"), requires = pkg_2)
+        content = std::template("graphite/carbon.tmpl"), requires = pkg_2)
     schema_config = std::ConfigFile(host = host, path = "/etc/carbon/storage-schemas.conf", 
-        content = template("graphite/carbon-schema.tmpl"), requires = pkg_2)
+        content = std::template("graphite/carbon-schema.tmpl"), requires = pkg_2)
     
     svc.requires = [config, schema_config, pkg_2]
 end
@@ -39,10 +39,10 @@ end
 implementation graphiteWeb for GraphiteServer:
     pkg_1 = std::Package(host = host, name = "graphite-web", state = "installed")
     web_py = std::ConfigFile(host = host, path = "/etc/graphite-web/local_settings.py",
-        content = template("graphite/graphite-web.tmpl"))
+        content = std::template("graphite/graphite-web.tmpl"))
 
 #    systemd_file = std::ConfigFile(host = host, path = "/etc/systemd/system/graphite-web.service", 
-#        content = template("graphite/graphite-web.service.tmpl"), requires = pkg_1)
+#        content = std::template("graphite/graphite-web.service.tmpl"), requires = pkg_1)
 #    std::Service(host = host, name = "graphite-web", onboot = true, state = "running", requires = systemd_file)
 end
 
