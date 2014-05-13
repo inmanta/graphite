@@ -1,0 +1,16 @@
+[Unit]
+Description=Graphite-web server
+After=syslog.target
+
+[Service]
+User=apache
+Group=apache
+Type=simple
+Restart=always
+Environment="DJANGO_SETTINGS_MODULE=graphite.settings"
+ExecStartPre=/usr/bin/django-admin syncdb
+ExecStart=/usr/bin/django-admin runserver 0.0.0.0:8080
+
+[Install]
+WantedBy=multi-user.target
+

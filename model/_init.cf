@@ -24,15 +24,15 @@ entity GraphiteServer extends ip::services::Server:
     bool webfrontend = true
 end
 
-implementation carbonServerRedhat:
+implementation carbonServerRedhat for GraphiteServer:
     pkg_2 = std::Package(host = host, name = "python-carbon", state = "installed")
     svc = std::Service(host = host, name = "carbon-cache", state = "running", onboot = true)
-    
-    config = std::ConfigFile(host = host, path = "/etc/carbon/carbon.conf", 
-        content = template("graphite/carbon.tmpl"), requires = pkg_2)
-    schema_config = std::ConfigFile(host = host, path = "/etc/carbon/storage-schemas.conf", 
-        content = template("graphite/carbon-schema.tmpl"), requires = pkg_2)
-    
+
+    config = std::ConfigFile(host = host, path = "/etc/carbon/carbon.conf",
+        content = std::template("graphite/carbon.tmpl"), requires = pkg_2)
+    schema_config = std::ConfigFile(host = host, path = "/etc/carbon/storage-schemas.conf",
+        content = std::template("graphite/carbon-schema.tmpl"), requires = pkg_2)
+
     svc.requires = [config, schema_config, pkg_2]
 end
 
@@ -40,11 +40,14 @@ implementation carbonServerUbuntu:
     pkg = std::Package(host = host, name = "python-whisper", state = "installed")
 end
 
-implementation graphiteWeb:
+implementation graphiteWeb for GraphiteServer:
     pkg_1 = std::Package(host = host, name = "graphite-web", state = "installed")
     web_py = std::ConfigFile(host = host, path = "/etc/graphite-web/local_settings.py",
-        content = template("graphite/graphite-web.tmpl"))
-#        requires = std::Package[host = host, name = "httpd"])
+        content = std::template("graphite/graphite-web.tmpl"))
+
+#    systemd_file = std::ConfigFile(host = host, path = "/etc/systemd/system/graphite-web.service",
+#        content = std::template("graphite/graphite-web.service.tmpl"), requires = pkg_1)
+#    std::Service(host = host, name = "graphite-web", onboot = true, state = "running", requires = systemd_file)
 end
 
 implement GraphiteServer using graphiteWeb when webfrontend == true

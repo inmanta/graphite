@@ -14,3 +14,7 @@ retentions = 60:90d
 [default_1min_for_1day]
 pattern = .*
 retentions = 60s:1d
+
+[detailed_for_services] 
+pattern = ^service\. 
+retentions = 20s:1h,60s:1d
