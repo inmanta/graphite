@@ -51,8 +51,8 @@ implementation graphiteWeb for GraphiteServer:
 end
 
 implement GraphiteServer using graphiteWeb when webfrontend == true
-implement GraphiteServer using carbonServerRedhat when host.os is "redhat"
-implement GraphiteServer using carbonServerUbuntu when host.os is "ubuntu"
+implement GraphiteServer using carbonServerRedhat when std::familyof(host.os, "redhat")
+implement GraphiteServer using carbonServerUbuntu when std::familyof(host.os, "ubuntu")
 
 port_range = ip::Port(low = 2003)
 s_server = ip::DstService(proto = "tcp", dst_range = port_range)
