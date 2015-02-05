@@ -1,7 +1,9 @@
-author: Bart Vanbrabant <bart.vanbrabant@cs.kuleuven.be>
+author: Bart Vanbrabant <bart@impera.io>
 license: Apache 2.0
 name: graphite
-requires: {ip: 'git@github.com:bartv/imp-ip, ">= 0.1"', std: 'git@github.com:bartv/imp-std,
-    ">= 0.3"'}
-source: git@github.com:bartv/imp-graphite
-version: 0.2.1
+source: git@git.impera.io:modules/graphite
+version: 0.3b1
+requires: 
+    ip: git@github.com:impera-io/ip, ">= 0.1"
+    std: git@github.com:impera-io/std, ">= 0.3"
+
