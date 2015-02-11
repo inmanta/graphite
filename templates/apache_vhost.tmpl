@@ -1,0 +1,33 @@
+<VirtualHost *:80>
+    DocumentRoot    {{ document_root }}
+    ServerName      {{ name.hostname }}
+    {% if (aliases | length) > 0 %}
+    ServerAlias     {% for alias in aliases %}{{ alias.hostname }} {% endfor %}
+    {% endif %}
+
+    <Directory {{ document_root }}>
+        AllowOverride all
+        Require all granted
+    </Directory>
+
+    ErrorLog /var/log/httpd/graphite-web-error.log
+    CustomLog /var/log/httpd/graphite-web-access.log common
+
+    Header set Access-Control-Allow-Origin "*"
+    Header set Access-Control-Allow-Methods "GET, OPTIONS"
+    Header set Access-Control-Allow-Headers "origin, authorization, accept"
+    Header set Access-Control-Allow-Credentials true
+   
+    WSGIScriptAlias / /usr/share/graphite/graphite-web.wsgi
+    WSGIImportScript /usr/share/graphite/graphite-web.wsgi process-group=%{GLOBAL} application-group=%{GLOBAL}
+
+    <Location "/content/">
+        SetHandler None
+    </Location>
+
+    Alias /media/ "/usr/lib/python2.7/site-packages/django/contrib/admin/media/"
+    <Location "/media/">
+        SetHandler None
+    </Location>
+</VirtualHost>
+
