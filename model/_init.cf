@@ -50,6 +50,7 @@ implementation carbonServerUbuntu for Carbon:
 end
 
 implementation graphiteWeb for Frontend:
+    # TODO: manage syncdb
     self.document_root = "/usr/share/graphite/webapp"
 
     vhost_cfg = std::ConfigFile(host=container.host, path="/etc/httpd/conf.d/{{ name.hostname }}.conf",
