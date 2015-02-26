@@ -51,16 +51,21 @@ end
 
 implementation graphiteWeb for Frontend:
     # TODO: manage syncdb
-    self.document_root = "/usr/share/graphite/webapp"
+    self.document_root = "/usr/share/graphite"
 
-    vhost_cfg = std::ConfigFile(host=container.host, path="/etc/httpd/conf.d/{{ name.hostname }}.conf",
+    vhost_cfg = std::ConfigFile(host=container.host, reload=true,
+                                path="/etc/httpd/conf.d/{{ name.hostname }}.conf",
                                 content=std::template("graphite/apache_vhost.tmpl"),
                                 requires = std::Package[host=container.host, name="httpd"],
                                 provides = std::Service[host=container.host, name="httpd"])
 
     pkg_1 = std::Package(host=container.host, name="graphite-web", state="installed")
     web_py = std::ConfigFile(host=container.host, path="/etc/graphite-web/local_settings.py",
-                             content=std::template("graphite/graphite-web.tmpl"))
+                             content=std::template("graphite/graphite-web.tmpl"), requires=pkg_1)
+
+    pkg_gr = std::Package(host=container.host, name="grafana", state="installed")
+    cfg_gr = std::ConfigFile(host=container.host, path="/opt/grafana-1.9.1/config.js",
+                             content=std::template("graphite/grafana.js"))
 end
 
 implement Frontend using graphiteWeb
