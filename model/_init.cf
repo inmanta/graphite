@@ -63,9 +63,10 @@ implementation graphiteWeb for Frontend:
     web_py = std::ConfigFile(host=container.host, path="/etc/graphite-web/local_settings.py",
                              content=std::template("graphite/graphite-web.tmpl"), requires=pkg_1)
 
-    pkg_gr = std::Package(host=container.host, name="grafana", state="installed")
-    cfg_gr = std::ConfigFile(host=container.host, path="/opt/grafana-1.9.1/config.js",
-                             content=std::template("graphite/grafana.js"))
+    yum_repo = yum::Repository(host=container.host, name="grafana", metadata_expire=10,
+                               baseurl="https://packagecloud.io/grafana/stable/el/6/$basearch")
+    pkg_gr = std::Package(host=container.host, name="grafana", state="installed",requires=yum_repo)
+    s_gr = std::Service(host=container.host, name="grafana-server", state="running", onboot=true, requires=pkg_gr)
 end
 
 implement Frontend using graphiteWeb
