@@ -61,7 +61,13 @@ implementation graphiteWeb for Frontend:
 
     pkg_1 = std::Package(host=container.host, name="graphite-web", state="installed")
     web_py = std::ConfigFile(host=container.host, path="/etc/graphite-web/local_settings.py",
-                             content=std::template("graphite/graphite-web.tmpl"), requires=pkg_1)
+                             content=std::template("graphite/graphite-web.tmpl"), requires = pkg_1)
+                             
+    exec::Run(host=container.host,
+            command="/usr/bin/graphite-manage migrate", 
+            requires = web_py, 
+            provides = std::Service[host=container.host, name="httpd"])
+
 
     yum_repo = yum::Repository(host=container.host, name="grafana", metadata_expire=10,
                                baseurl="https://packagecloud.io/grafana/stable/el/6/$basearch")
