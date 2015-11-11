@@ -41,8 +41,9 @@ implementation carbonServerRedhat for Carbon:
         content = std::template("graphite/carbon.tmpl"), requires = pkg_2)
     schema_config = std::ConfigFile(host = host, path = "/etc/carbon/storage-schemas.conf",
         content = std::template("graphite/carbon-schema.tmpl"), requires = pkg_2)
-
-    svc.requires = [config, schema_config, pkg_2]
+    aggregation_config = std::ConfigFile(host = host, path = "/etc/carbon/storage-aggregation.conf",
+        content = std::template("graphite/carbon-aggregation.tmpl"), requires = pkg_2)
+    svc.requires = [config, schema_config, aggregation_config, pkg_2]
 end
 
 implementation carbonServerUbuntu for Carbon:

@@ -11,10 +11,12 @@
 pattern = ^carbon\.
 retentions = 60:90d
 
-[default_1min_for_1day]
-pattern = .*
-retentions = 60s:1d
+[collectd-10]
+pattern = collectd
+retentions = 10s:6h,1min:6d,10min:1800d
 
-[detailed_for_services] 
-pattern = ^service\. 
-retentions = 20s:1h,60s:1d
+[default]
+pattern = .*
+retentions = 1s:5min,10s:6h,1min:6d,10min:1800d
+
+
