@@ -64,10 +64,11 @@ implementation graphiteWeb for Frontend:
     web_py = std::ConfigFile(host=container.host, path="/etc/graphite-web/local_settings.py",
                              content=std::template("graphite/graphite-web.tmpl"), requires = pkg_1)
                              
-    exec::Run(host=container.host, command="/usr/bin/gmanage migrate", requires=bin_file,
+    migrate = exec::Run(host=container.host, command="/usr/bin/gmanage migrate",
               requires=web_py, provides=std::Service[host=container.host, name="httpd"])
 
     bin_file = std::File(host=container.host, path="/usr/bin/gmanage", mode=755, owner="root",
+                         provides=migrate,
                          group="root", content=std::source("graphite/graphite-manage"))
 
     yum_repo = yum::Repository(host=container.host, name="grafana", metadata_expire=10,
