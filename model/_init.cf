@@ -22,6 +22,7 @@ entity Carbon extends ip::services::Server:
     """
 end
 
+
 port_range = ip::Port(low=2003)
 s_server = ip::DstService(proto="tcp", dst_range=port_range)
 
@@ -30,6 +31,26 @@ Carbon carbon_server [1] -- [0:1] Frontend graphite_frontend
 entity Frontend extends web::Application:
 
 end
+
+entity GrafanaDashboard:
+    """
+        Grafana Dashboard config
+    """
+     string content
+     string name
+end
+
+Frontend server [1] -- [0:] GrafanaDashboard dash 
+
+implementation grafanaDashboardFile for GrafanaDashboard:
+    std::ConfigFile(host = server.container.host, path = "/etc/grafana/dashboards/{{ self.name }}",
+        content = self.content, 
+        reload = true,
+        requires = std::Directory[host=server.container.host, path="/etc/grafana/dashboards/"],
+        provides = std::Service[host=server.container.host, name="grafana-server"])
+end
+
+implement GrafanaDashboard using grafanaDashboardFile
 
 implementation carbonServerRedhat for Carbon:
     self.services = graphite::s_server
@@ -73,7 +94,14 @@ implementation graphiteWeb for Frontend:
     yum_repo = yum::Repository(host=container.host, name="grafana", metadata_expire=10,
                                baseurl="https://packagecloud.io/grafana/stable/el/6/$basearch")
     pkg_gr = std::Package(host=container.host, name="grafana", state="installed",requires=yum_repo)
-    s_gr = std::Service(host=container.host, name="grafana-server", state="running", onboot=true, requires=pkg_gr)
+    dash_dir = std::Directory(host=container.host, path="/etc/grafana/dashboards/",requires=pkg_gr, owner="root", group="root",
+                               mode=755)
+    # add dashboard loader script  
+    loader = std::File(host=container.host, path="/usr/sbin/grafanaloader.py", mode=755, owner="root", group="root",content=std::file("graphite/grafanaloader.py"))
+    sfile = std::ConfigFile(host=container.host, path="/etc/systemd/system/grafana-server.service",content=std::file("graphite/grafana-server.service"))
+    
+        
+    s_gr = std::Service(host=container.host, name="grafana-server", state="running", onboot=true, requires=[dash_dir,loader,sfile])
 end
 
 implement Frontend using graphiteWeb
