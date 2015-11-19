@@ -19,6 +19,14 @@ files = os.listdir(args.dir)
 server = args.server
 auth = (args.user,args.pwd)
 
+down = True
+while down:
+    try:
+        requests.get(server + '/api/search', auth=auth).text
+        down = False
+    except:
+        pass
+
 def fail(r):
     print("failed for dash (" + str(r.status_code)+ ") " + f)
     print(r.text)
