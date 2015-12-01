@@ -33,11 +33,6 @@ def fail(r):
 
 for f in files:
     with open(args.dir+'/'+f) as fh:
-       r = requests.post(server + '/api/dashboards/db', data=fh, auth=auth,headers={"Content-Type":"application/json"})
-       if r.status_code == requests.codes.ok:
-            print("uploaded dash " + f)
-       elif r.status_code == 404:
-            fh.seek(0)
             d = json.load(fh)
             d["dashboard"]["id"]= None;
             r = requests.post(server + '/api/dashboards/db', json=d, auth=auth,headers={"Content-Type":"application/json"})
@@ -45,9 +40,6 @@ for f in files:
                 print("created new dash " + f)
             else:
                 fail(r)
-       else:
-            fail(r)
-
 
 if args.graphite:
     r = requests.post(server + '/api/datasources', json={"name":"default","type":"graphite","url":str(args.graphite),"access":"proxy","basicAuth":False, "isDefault":True},                                                             auth=auth,headers={"Content-Type":"application/json"})
