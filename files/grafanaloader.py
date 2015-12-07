@@ -3,6 +3,7 @@
 import argparse
 import os
 import requests
+import time
 import json
 
 parser = argparse.ArgumentParser(description='Load dashboards from a directory into grafana')
@@ -14,7 +15,7 @@ parser.add_argument('-g','--graphite', help='graphite url')
 
 args = parser.parse_args()
 
-files = os.listdir(args.dir) 
+files = os.listdir(args.dir)
 
 server = args.server
 auth = (args.user,args.pwd)
@@ -25,7 +26,7 @@ while down:
         requests.get(server + '/api/search', auth=auth).text
         down = False
     except:
-        pass
+        time.sleep(1)
 
 def fail(r):
     print("failed for dash (" + str(r.status_code)+ ") " + f)
