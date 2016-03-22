@@ -1,5 +1,5 @@
 """
-    Copyright 2015 Impera
+    Copyright 2016 inmanta
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    Contect: bart@impera.io
+    Contect: bart@inmanta.com
 """
 
 entity Carbon extends ip::services::Server:
@@ -43,11 +43,10 @@ end
 Frontend server [1] -- [0:] GrafanaDashboard dash 
 
 implementation grafanaDashboardFile for GrafanaDashboard:
-    std::ConfigFile(host = server.container.host, path = "/etc/grafana/dashboards/{{ self.name }}",
-        content = self.content, 
-        reload = true,
-        requires = std::Directory[host=server.container.host, path="/etc/grafana/dashboards/"],
-        provides = std::Service[host=server.container.host, name="grafana-server"])
+    std::ConfigFile(host=server.container.host, path="/etc/grafana/dashboards/{{ self.name }}",
+                    content=self.content, reload=true, 
+                    requires=std::Directory[host=server.container.host, path="/etc/grafana/dashboards/"],
+                    provides=std::Service[host=server.container.host, name="grafana-server"])
 end
 
 implement GrafanaDashboard using grafanaDashboardFile
@@ -58,17 +57,17 @@ implementation carbonServerRedhat for Carbon:
     pkg_2 = std::Package(host=host, name="python-carbon", state="installed")
     svc = std::Service(host=host, name="carbon-cache", state="running", onboot=true)
 
-    config = std::ConfigFile(host = host, path = "/etc/carbon/carbon.conf",
-        content = std::template("graphite/carbon.tmpl"), requires = pkg_2)
-    schema_config = std::ConfigFile(host = host, path = "/etc/carbon/storage-schemas.conf",
-        content = std::template("graphite/carbon-schema.tmpl"), requires = pkg_2)
-    aggregation_config = std::ConfigFile(host = host, path = "/etc/carbon/storage-aggregation.conf",
-        content = std::template("graphite/carbon-aggregation.tmpl"), requires = pkg_2)
+    config = std::ConfigFile(host=host, path="/etc/carbon/carbon.conf",
+                             content=std::template("graphite/carbon.tmpl"), requires=pkg_2)
+    schema_config = std::ConfigFile(host=host, path="/etc/carbon/storage-schemas.conf",
+                                    content=std::template("graphite/carbon-schema.tmpl"), requires=pkg_2)
+    aggregation_config = std::ConfigFile(host=host, path="/etc/carbon/storage-aggregation.conf",
+                                         content=std::template("graphite/carbon-aggregation.tmpl"), requires=pkg_2)
     svc.requires = [config, schema_config, aggregation_config, pkg_2]
 end
 
 implementation carbonServerUbuntu for Carbon:
-    pkg = std::Package(host = host, name = "python-whisper", state = "installed")
+    pkg = std::Package(host=host, name="python-whisper", state="installed")
 end
 
 implementation graphiteWeb for Frontend:
@@ -78,27 +77,15 @@ implementation graphiteWeb for Frontend:
     vhost_cfg = std::ConfigFile(host=container.host, reload=true,
                                 path="/etc/httpd/conf.d/{{ name.hostname }}.conf",
                                 content=std::template("graphite/apache_vhost.tmpl"),
-                                requires = std::Package[host=container.host, name="httpd"],
-                                provides = std::Service[host=container.host, name="httpd"])
+                                requires=std::Package[host=container.host, name="httpd"],
+                                provides=std::Service[host=container.host, name="httpd"])
 
     pkg_1 = std::Package(host=container.host, name="graphite-web", state="installed")
     web_py = std::ConfigFile(host=container.host, path="/etc/graphite-web/local_settings.py",
-                             content=std::template("graphite/graphite-web.tmpl"), requires = pkg_1)
+                             content=std::template("graphite/graphite-web.tmpl"), requires=pkg_1)
                              
     migrate = exec::Run(host=container.host, command="su apache -s /bin/bash -c '/usr/bin/python /usr/bin/graphite-manage migrate'",
-              requires=web_py, provides=std::Service[host=container.host, name="httpd"])
-
-    yum_repo = yum::Repository(host=container.host, name="grafana", metadata_expire=10,
-                               baseurl="https://packagecloud.io/grafana/stable/el/6/$basearch")
-    pkg_gr = std::Package(host=container.host, name="grafana", state="installed",requires=yum_repo)
-    dash_dir = std::Directory(host=container.host, path="/etc/grafana/dashboards/",requires=pkg_gr, owner="root", group="root",
-                               mode=755)
-    # add dashboard loader script  
-    loader = std::File(host=container.host, path="/usr/sbin/grafanaloader.py", mode=755, owner="root", group="root",content=std::file("graphite/grafanaloader.py"))
-    sfile = std::ConfigFile(host=container.host, path="/etc/systemd/system/grafana-server.service",content=std::file("graphite/grafana-server.service"))
-    
-        
-    s_gr = std::Service(host=container.host, name="grafana-server", state="running", onboot=true, requires=[dash_dir,loader,sfile])
+                        requires=web_py, provides=std::Service[host=container.host, name="httpd"])
 end
 
 implement Frontend using graphiteWeb
