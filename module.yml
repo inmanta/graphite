@@ -1,10 +1,9 @@
-author: Bart Vanbrabant <bart@impera.io>
+author: Inmanta <code@inmanta.com>
 license: Apache 2.0
 name: graphite
-source: git@git.impera.io:modules/graphite
-version: 0.3b1
+version: '0.3'
 requires:
-    ip: git@git.impera.io:modules/ip, ">= 0.1"
-    std: git@git.impera.io:modules/std, ">= 0.3"
-    web: git@git.impera.io:modules/web, ">= 0.1b1"
-    yum: git@git.impera.io:modules/yum, ">= 0.1"
+- ip
+- std
+- web
+- yum
