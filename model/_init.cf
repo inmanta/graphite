@@ -37,25 +37,6 @@ entity Frontend extends web::Application:
 
 end
 
-entity GrafanaDashboard:
-    """
-        Grafana Dashboard config
-    """
-     string content
-     string name
-end
-
-Frontend server [1] -- [0:] GrafanaDashboard dash 
-
-implementation grafanaDashboardFile for GrafanaDashboard:
-    std::ConfigFile(host=server.container.host, path="/etc/grafana/dashboards/{{ self.name }}",
-                    content=self.content, reload=true, 
-                    requires=std::Directory[host=server.container.host, path="/etc/grafana/dashboards/"],
-                    provides=std::Service[host=server.container.host, name="grafana-server"])
-end
-
-implement GrafanaDashboard using grafanaDashboardFile
-
 implementation carbonServerRedhat for Carbon:
     self.services = graphite::s_server
 
