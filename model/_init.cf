@@ -72,7 +72,7 @@ implementation graphiteWeb for Frontend:
                              content=std::template("graphite/graphite-web.tmpl"), requires=pkg_1)
                              
     migrate = exec::Run(host=container.host, command="su apache -s /bin/bash -c '/usr/bin/django-admin migrate --settings=graphite.settings --run-syncdb --no-input'",
-                        requires=web_py, provides=std::Service[host=container.host, name="httpd"], reload=true)
+                        requires=web_py, provides=std::Service[host=container.host, name="httpd"])
     exec::Run(host=container.host, command="su apache -s /bin/bash -c '/usr/bin/graphite-build-index'",
               requires=migrate)
 end
