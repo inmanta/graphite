@@ -1,7 +1,7 @@
 author: Inmanta <code@inmanta.com>
 license: Apache 2.0
 name: graphite
-version: 0.5.0.dev1479989767
+version: 0.5.0
 requires:
 - ip
 - std
