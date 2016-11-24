@@ -40,7 +40,8 @@ end
 implementation carbonServerRedhat for Carbon:
     self.services = graphite::s_server
 
-    pkg_2 = std::Package(host=host, name="python-carbon", state="installed")
+    pkg = std::Package(host=host, name="python2-twisted", state="installed")
+    pkg_2 = std::Package(host=host, name="python2-carbon", state="installed", requires=pkg)
     svc = std::Service(host=host, name="carbon-cache", state="running", onboot=true)
 
     config = std::ConfigFile(host=host, path="/etc/carbon/carbon.conf",
@@ -70,8 +71,10 @@ implementation graphiteWeb for Frontend:
     web_py = std::ConfigFile(host=container.host, path="/etc/graphite-web/local_settings.py",
                              content=std::template("graphite/graphite-web.tmpl"), requires=pkg_1)
                              
-    migrate = exec::Run(host=container.host, command="su apache -s /bin/bash -c '/usr/bin/python /usr/bin/graphite-manage migrate'",
-                        requires=web_py, provides=std::Service[host=container.host, name="httpd"])
+    migrate = exec::Run(host=container.host, command="su apache -s /bin/bash -c '/usr/bin/django-admin migrate --settings=graphite.settings --run-syncdb --no-input'",
+                        requires=web_py, provides=std::Service[host=container.host, name="httpd"], reload=true)
+    exec::Run(host=container.host, command="su apache -s /bin/bash -c '/usr/bin/graphite-build-index'",
+              requires=migrate)
 end
 
 implement Frontend using graphiteWeb
